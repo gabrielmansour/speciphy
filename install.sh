@@ -1,3 +1,5 @@
-wget https://github.com/downloads/Behat/Behat/behat.phar -O behat.phar
-wget http://getcomposer.org/composer.phar -O composer.phar
+if [ ! -f composer.phar ]; then
+  wget http://getcomposer.org/composer.phar -O composer.phar
+  chmod +x composer.phar
+fi
 php composer.phar install

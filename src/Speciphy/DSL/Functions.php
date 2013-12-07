@@ -8,6 +8,7 @@ use Speciphy\ExampleGroup;
 use Speciphy\Example;
 use Speciphy\Pending;
 use Speciphy\Subject;
+use Speciphy\Let;
 
 use \Esperance\Assertion;
 
@@ -24,6 +25,8 @@ function describe($description) {
                 $exampleGroup->addChild($value);
             } else if ($value instanceof Subject) {
                 $exampleGroup->setSubject($value);
+            } else if ($value instanceof Let) {
+                $exampleGroup->addLet($value);
             }
         }
     }
@@ -49,4 +52,8 @@ function subject($block) {
 
 function expect($subject) {
     return new Assertion($subject);
+}
+
+function let($variable, $block){
+    return new Let($variable, $block);
 }

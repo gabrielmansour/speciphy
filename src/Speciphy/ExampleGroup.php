@@ -34,6 +34,13 @@ class ExampleGroup
     protected $_subject;
 
     /**
+     * Set of let statements.
+     *
+     * @var array
+     */
+    protected $_lets;
+
+    /**
      * Constructor.
      *
      * @param string $description
@@ -42,6 +49,7 @@ class ExampleGroup
     {
         $this->_description = $description;
         $this->_examples    = array();
+        $this->_lets    = array();
     }
 
     /**
@@ -103,10 +111,23 @@ class ExampleGroup
     {}
 
     public function runBeforeHooks()
-    {}
+    {
+      // set lets
+      foreach ($this->getlets() as $let) {
+        $name = $let->_name;
+        $value = $let->_value;
+        global $$name;
+        $$name = (is_callable($value) ? call_user_func($value) : $value);
+      }
+    }
 
     public function runAfterHooks()
-    {}
+    {
+      // Unset lets
+      foreach ($this->getLets() as $let) {
+        unset($GLOBALS[$let->_name]);
+      }
+    }
 
     public function setSubject(Subject $subject)
     {
@@ -122,6 +143,19 @@ class ExampleGroup
         } else {
             return NULL;
         }
+    }
+
+    public function addLet(Let $let)
+    {
+        $this->_lets[] = $let;
+    }
+
+    public function getLets(){
+      $lets = $this->_lets;
+      if ($this->_parent)
+        $lets = array_merge($this->_parent->getLets(), $lets);
+
+      return $lets;
     }
 
     /**

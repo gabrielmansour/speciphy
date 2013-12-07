@@ -62,4 +62,13 @@ class Pending implements ExampleInterface
     {
         return false;
     }
+
+    public function run($reporter = NULL){
+      $reporter->examplePending($this);
+    }
+
+    public function getNestLevel()
+    {
+        return $this->_exampleGroup->getNestLevel() + 1;
+    }
 }

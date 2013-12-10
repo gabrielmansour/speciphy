@@ -18,16 +18,16 @@ class ProgressFormatter
 
     public function examplePassed($example)
     {
-        fputs($this->_fp, '.');
+        fputs($this->_fp, "\033[32m.\033[0m");
     }
 
     public function exampleFailed($example)
     {
-        fputs($this->_fp, 'F');
+        fputs($this->_fp, "\033[1;31mF\033[0m");
     }
 
     public function examplePending($example)
     {
-        fputs($this->_fp, 'P');
+        fputs($this->_fp, "\033[33mP\033[0m");
     }
 }

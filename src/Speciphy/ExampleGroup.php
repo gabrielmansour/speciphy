@@ -113,11 +113,13 @@ class ExampleGroup
     public function runBeforeHooks()
     {
       // set lets
-      foreach ($this->getlets() as $let) {
+      foreach ($this->getLets() as $let) {
         $name = $let->_name;
         $value = $let->_value;
-        global $$name;
-        $$name = (is_callable($value) ? call_user_func($value) : $value);
+        if (!array_key_exists($name, $GLOBALS)){
+          global $$name;
+          $$name = (is_callable($value) ? call_user_func($value) : $value);
+        }
       }
     }
 
@@ -153,7 +155,7 @@ class ExampleGroup
     public function getLets(){
       $lets = $this->_lets;
       if ($this->_parent)
-        $lets = array_merge($this->_parent->getLets(), $lets);
+        $lets = array_merge($lets, $this->_parent->getLets());
 
       return $lets;
     }

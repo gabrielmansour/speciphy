@@ -5,9 +5,14 @@ class DocumentationFormatter
 {
     protected $_buffer;
 
+    protected $nPassed, $nFailed, $nPending;
+    protected $failures;
+
     public function __construct()
     {
         $this->_buffer = '';
+        $this->nPassed = $this->nFailed = $this->nPending = 0;
+        $this->failures = array();
     }
 
     public function exampleGroupStarted($group)
@@ -23,6 +28,7 @@ class DocumentationFormatter
 
     public function examplePassed($example)
     {
+        $this->nPassed++;
         $this->_buffer .= "\033[32m";
         $this->_buffer .= str_repeat('  ', $example->getNestLevel());
         $this->_buffer .= $example->getDescription() . PHP_EOL;
@@ -31,6 +37,8 @@ class DocumentationFormatter
 
     public function exampleFailed($example)
     {
+        $this->nFailed++;
+        $this->failures[] = $example;
         $this->_buffer .= "\033[31m";
         $this->_buffer .= str_repeat('  ', $example->getNestLevel());
         $this->_buffer .= $example->getDescription() . ' (FAILED)' . PHP_EOL;
@@ -39,6 +47,7 @@ class DocumentationFormatter
 
     public function examplePending($example)
     {
+        $this->nPending++;
         $this->_buffer .= "\033[33m";
         $this->_buffer .= str_repeat('  ', $example->getNestLevel());
         $this->_buffer .= $example->getDescription() . ' (PENDING)' . PHP_EOL;
@@ -47,6 +56,23 @@ class DocumentationFormatter
 
     public function get()
     {
-        return $this->_buffer;
+        $buf = array( $this->_buffer,
+          ($this->nPassed ? "\033[32m$this->nPassed passed, \033[0m" : '') .
+          ($this->nPending ? "\033[33m$this->nPending pending, \033[0m" : '') .
+          ($this->nFailed ? "\033[31m$this->nFailed failed" : '0 failed') );
+        if ($this->nFailed) {
+          $f = array_map(function($e){
+            $descs = array_map(function($a){ return trim($a->getDescription()); },
+              array_merge(array_reverse($e->getExampleGroup()->getAncestors()), array($e->getExampleGroup(), $e)) );
+            return join(' ', $descs);
+          }, $this->failures);
+
+          $buf = array_merge($buf, array(
+            "  Failures:",
+            "\t" . join(PHP_EOL. "\t", $f),
+            "\033[0m"
+          ) );
+        }
+        return join(PHP_EOL.PHP_EOL, $buf);
     }
 }
